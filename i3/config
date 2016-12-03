@@ -1,0 +1,244 @@
+### DEFINES ###
+
+# Mod keys
+set $mod Mod4
+set $alt Mod1
+set $printscr 107
+
+# Workspace names
+set $ws1  I
+set $ws2  II
+set $ws3  III
+set $ws4  IV
+set $ws5  V
+set $ws6  VI
+set $ws7  VII
+set $ws8  VIII
+set $ws9  IX
+set $ws10 X
+
+# Gaps
+set $gaps_inner_padding 10
+set $gaps_outer_padding 10
+
+# Vim keys
+set $up k
+set $down j
+set $left h
+set $right l
+
+### THEME ────────────────────────────────────────────────────────────────── ###
+
+# Regular Colors
+# ──────────────────
+set $S_BLACK   #002b36
+set $S_RED     #dc322f
+set $S_GREEN   #859900
+set $S_YELLOW  #b58900
+set $S_BLUE    #268bd2
+set $S_MAGENTA #d33682
+set $S_CYAN    #2aa198
+
+# Bright Colors
+# ─────────────────────────
+set $S_BRIGHT_BLACK   #073642
+set $S_BRIGHT_RED     #cb4b16
+set $S_BRIGHT_GREEN   #b0c700
+set $S_BRIGHT_YELLOW  #d19d00
+set $S_BRIGHT_BLUE    #2a9fec
+set $S_BRIGHT_MAGENTA #6c71c4
+set $S_BRIGHT_CYAN    #35cec2
+
+# Theme
+# ────────────────────
+set $FOCUSED   #859900
+set $UNFOCUSED #002b36
+set $HIGHLIGHT #b0c700
+
+font pango:RobotoMono Nerd Font 10
+
+# Layout Colors         Border     Background Text       Indicator
+# ───────────────────── ────────── ────────── ────────── ──────────
+client.focused          $FOCUSED   $FOCUSED   $UNFOCUSED $FOCUSED
+client.unfocused        $UNFOCUSED $UNFOCUSED $FOCUSED   $UNFOCUSED
+client.focused_inactive $UNFOCUSED $UNFOCUSED $FOCUSED   $UNFOCUSED
+client.urgent           $FOCUSED   $FOCUSED   $UNFOCUSED $FOCUSED
+client.background       $UNFOCUSED
+
+### BORDERS ──────────────────────────────────────────────────────────────── ###
+new_window pixel 2
+new_float none
+# focus_follows_mouse no
+
+### GAPS ─────────────────────────────────────────────────────────────────── ###
+gaps inner $gaps_inner_padding
+gaps outer $gaps_outer_padding
+
+floating_modifier $mod
+
+# kill focused window
+bindsym $mod+q kill
+
+
+### Change focus ###
+
+# Vim Keys
+# ───────────────────────────────────
+bindsym $mod+$up          focus up
+bindsym $mod+$down        focus down
+bindsym $mod+$left        focus left
+bindsym $mod+$right       focus right
+bindsym $mod+Shift+$up    move  up
+bindsym $mod+Shift+$down  move  down
+bindsym $mod+Shift+$left  move  left
+bindsym $mod+Shift+$right move  right
+
+# Arrow Keys
+# ──────────────────────────────────
+bindsym $mod+Up          focus up
+bindsym $mod+Down        focus down
+bindsym $mod+Left        focus left
+bindsym $mod+Right       focus right
+bindsym $mod+Shift+Up    move  up
+bindsym $mod+Shift+Down  move  down
+bindsym $mod+Shift+Left  move  left
+bindsym $mod+Shift+Right move  right
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# split in horizontal orientation
+bindsym $mod+Control+h split h
+
+# split in vertical orientation
+bindsym $mod+Control+v split v
+
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+Control+s layout stacking
+bindsym $mod+Control+w layout tabbed
+bindsym $mod+Control+e layout toggle split
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# Switch to workspace
+# ────────────────────────────
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+0 workspace $ws10
+
+# Move focused container to workspace
+# ────────────────────────────────────────────────────
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+7 move container to workspace $ws7
+bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
+bindsym $mod+Shift+0 move container to workspace $ws10
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+# exit i3 (logs you out of your X session)
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+# Enter resize mode
+bindsym $mod+r mode "resize"
+
+mode "resize" {
+  # Vim keys
+  bindsym $up    resize shrink height 10 px or 10 ppt
+  bindsym $down  resize grow   height 10 px or 10 ppt
+  bindsym $left  resize shrink width  10 px or 10 ppt
+  bindsym $right resize grow   width  10 px or 10 ppt
+
+  # Arrow keys
+  bindsym Up    resize shrink height 10 px or 10 ppt
+  bindsym Down  resize grow   height 10 px or 10 ppt
+  bindsym Left  resize shrink width  10 px or 10 ppt
+  bindsym Right resize grow   width  10 px or 10 ppt
+
+  # Exit resize mode
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+}
+
+### WORKSPACE ASSIGNS ────────────────────────────────────────────────────────── ###
+
+assign [class="Atom"] $ws2
+# assign [class="discord-canary"] $ws8
+assign [class="Steam"] $ws8
+
+### FLOATING WINDOWS ─────────────────────────────────────────────────────────── ###
+
+### floating windows ###
+for_window [class="Steam"] floating enable
+for_window [class="Gimp"] floating enable
+# for_window [class="PlayOnLinux"] floating enable
+
+### KEYBINDS ─────────────────────────────────────────────────────────────── ###
+
+# Adjust brightness
+bindsym XF86MonBrightnessUp   exec --no-startup-id "xbacklight -inc 5"
+bindsym XF86MonBrightnessDown exec --no-startup-id "xbacklight -dec 5"
+
+# Adjust audio volume
+bindsym XF86AudioRaiseVolume  exec --no-startup-id "amixer -q sset Master 10%+"
+bindsym XF86AudioLowerVolume  exec --no-startup-id "amixer -q sset Master 10%-"
+bindsym XF86AudioMute         exec --no-startup-id "amixer -q sset Master toggle"
+
+# Take a screenshot
+bindcode $printscr exec --no-startup-id "spectacle"
+
+# Start a terminal
+bindsym $mod+Return exec --no-startup-id konsole
+
+# Launch a program runner
+bindsym $mod+Tab exec --no-startup-id "fish -c launcher"
+
+### EXECS ────────────────────────────────────────────────────────────────── ###
+
+exec --no-startup-id "compton -bG --backend glx --config ~/.config/compton.conf"
+exec --no-startup-id "chromium --no-startup-window"
+
+exec --no-startup-id "~/.config/i3/startup.sh"
+exec --no-startup-id "node ~/.config/i3/bar.js"
+
+exec --no-startup-id "sleep 5 && discord-canary"
+
+# Start i3bar to display a workspace bar (plus the system information i3status
+# finds out, if available)
+# bar {
+#   position bottom
+#   status_command i3blocks
+#
+#   colors {
+#     background $UNFOCUSED
+#     statusline #888888
+#     separator #b0c700
+#
+#     focused_workspace  $S_BRIGHT_BLUE $S_BLUE #ffffff
+#     active_workspace   $S_BRIGHT_BLUE $S_BLUE #ffffff
+#     inactive_workspace $UNFOCUSED $UNFOCUSED #888888
+#     urgent_workspace   $UNFOCUSED $S_RED #ffffff
+#     binding_mode       $FOCUSED #b0c700 #ffffff
+#   }
+# }
