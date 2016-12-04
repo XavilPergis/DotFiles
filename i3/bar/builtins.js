@@ -68,9 +68,6 @@ Object.defineProperty(Object.prototype, 'toArray', {
   }
 });
 
-// map = (a -> b) -> [a] -> [b]
-// mapObj = () -> {a: b} -> {c: d}
-
 Object.defineProperty(Object.prototype, 'mapAll', {
   __proto__: null,
   value: function(keyFn, valFn) {
@@ -88,6 +85,6 @@ Object.defineProperty(Object.prototype, 'mapKeys', {
 Object.defineProperty(Object.prototype, 'map', {
   __proto__: null,
   value: function(valFn) {
-    return this.mapAll((k, v) => k, (k, v, obj) => valFn(v, obj));
+    return this.mapAll((k, v) => k, (k, v, obj) => valFn(obj, v));
   }
 });

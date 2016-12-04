@@ -3,61 +3,41 @@ const os = require('os');
 
 // Load extensions of builtin objects
 require('./builtins');
+let { readableMem, theme } = require('./utils');
 
-const BG_COLOR = '#002b36';
-const FG_COLOR = '#859900';
+const setColor = (color) => `%{F${color}}%{B${theme.BLACK}}`;
 
-const WHITE   = '#839496';
-const BLACK   = '#002b36';
-const RED     = '#dc322f';
-const GREEN   = '#859900';
-const BR_GREEN= '#9baf00';
-const YELLOW  = '#b58900';
-const BLUE    = '#268bd2';
-const MAGENTA = '#d33682';
-const CYAN    = '#2aa198';
-
-const blackCode = `%{F${BLACK}}%{B${BLACK}}`;
-const redCode = `%{F${RED}}%{B${BLACK}}`;
-const greenCode = `%{F${GREEN}}%{B${BLACK}}`;
-const yellowCode = `%{F${YELLOW}}%{B${BLACK}}`;
-const blueCode = `%{F${BLUE}}%{B${BLACK}}`;
-const magentaCode = `%{F${MAGENTA}}%{B${BLACK}}`;
-const cyanCode = `%{F${CYAN}}%{B${BLACK}}`;
-
-const setColor = (color) => `%{F${color}}%{B${BLACK}}`;
-
+/**
+ * @typedef {Function[]} AsyncFunctionPair
+ *
+ * @param {*} accumulator The starting accumulator value.
+ * @param {AsyncFunctionPair[]} callbackList Pairs of functions and callbacks to execute.
+ * @param {Function} aggregateCallback Called once all other callbacks finish.
+ *
+ * Combines a list of callbacks and executes them in order. Each element in
+ * the list is called and its return value handed to the second item in
+ * the "tuple". The callback is called with the accumulator first, and then
+ * an unpacked list of return from the function.
+ *
+ * After the final callback in the list is called, `aggregateCallback` is
+ * called with the accumulator's final value.
+ */
 const aggregate = (accumulator, callbackList, aggregateCallback) => {
-  let out = {};
-
   let runNext = (callbackUnit) => {
-    let fn = callbackUnit[0];
-    let callback = callbackUnit[1];
-
-    fn((...args) => {
-      callback(accumulator, ...args);
+    callbackUnit[0]((...args) => {
+      callbackUnit[1](accumulator, ...args);
       let next = callbackList.pop()
       if(next) runNext(next);
       else aggregateCallback(accumulator);
     })
   }
 
-  runNext(callbackList.pop());
-
+  // Pop element off the front and run it.
+  runNext(callbackList.shift());
 };
 
-// Object.defineProperty(Array.prototype, '', {
-//   __proto__: null,
-//   value: function() {
-//
-//   }
-// });
-
-let runCmd = (cmd, cb) => {
-  exec(cmd, (err, stdout, stderr) => {
-    if(!err) cb(stdout, stderr);
-  });
-};
+// Thin wrapper around `child_process.exec()`. Discards `err`.
+const runCmd = (cmd, cb) => exec(cmd, (err, so, se) => { if(!err) return cb(so, se); });
 
 let getWorkspaceLabel = (cb) => {
   runCmd('i3-msg -t get_outputs | sed \'s/.*"current_workspace":"\\([^"]*\\)".*/\\1/\'', (out) => {
@@ -85,12 +65,7 @@ let getVolume = (cb) => {
   });
 }
 
-// let getCPUTemperatures = (cb) => {
-//   ;
-// };
-
 let getCPUStats = (cb) => {
-
   let getTemps = (icb) => {
     runCmd("sensors | grep -oP 'Core.*?\\.0' | grep -o '+[0-9.]*'", (out) => {
       icb(out.split('\n').trimLast().map(e => parseInt(e)));
@@ -114,23 +89,7 @@ let getCPUStats = (cb) => {
         avgTimes[type] += cpu.times[type] / cpus.length;
       }
 
-      return times;
-    });
-
-    runCmd("mpstat -P ALL | grep -P '\\d+:\\d+:\\d+\\s+(?:AM|PM)\\s+(?:all|\\d+)'", (out) => {
-      let util = {};
-
-      out.split('\n').trimLast().forEach((line) => {
-        let stats = line.split(/\s+/).slice(2);
-        let categories = ['user', 'nice', 'sys', 'iowait', 'irq', 'soft', 'steal', 'guest', 'gnice', 'idle'];
-
-        let cpuName = stats[0] == 'all' ? 'average' : `cpu${stats[0]}`;
-
-        util[cpuName] = categories.zipObject(stats.trimFirst());
-      });
-
-      icb(util);
-
+      icb(times);
     });
   };
 
@@ -148,23 +107,20 @@ let getCPUStats = (cb) => {
 
 let getMemoryStats = (cb) => {
   runCmd('free', (out) => {
-    let memStats = {};
+    let memStats = { raw: {}, readable: {} };
     out.split('\n').trimFirst().trimLast().forEach((line) => {
       let name = line.split(':')[0];
       let categories = ['total', 'used', 'free', 'shared', 'cache', 'available'];
 
-      memStats[name.toLowerCase()] = categories.zipObject(line.split(':')[1].split(/\s+/).trimFirst());
+      let rawObj = categories.zipObject(line.split(':')[1].split(/\s+/).trimFirst()).map((k, v) => parseInt(v));
+      let readableObj = rawObj.map((k, v) => readableMem(v));
+
+      memStats.raw[name.toLowerCase()] = rawObj;
+      memStats.readable[name.toLowerCase()] = readableObj;
     });
 
     cb(memStats);
   });
-};
-
-let humanReadableMem = (mem) => {
-  let megs = Math.round(10 * mem / 1024) / 10; // Megs
-  let gigs = Math.round(10 * mem / 1048576) / 10; // Gigs
-
-  return gigs >= 1 ? gigs + ' GiB' : megs + ' MiB';
 };
 
 let getBatteryStats = (cb) => {
@@ -184,10 +140,10 @@ let getDate = (cb) => {
   runCmd('date "+%I:%M:%S%%%p"', (out) => cb(out.split('%').map((e) => e.replace('\n', ''))));
 };
 
-
-let setKey = (key) => {
-  return (obj, val) => obj[key] = val;
-};
+// A little hacky thing to use in calls to `aggregate()`
+// Returns a function that will set `key` of the accumulator to the
+// corresponding function's return value
+let setKey = (key) => (obj, val) => obj[key] = val;
 
 let getSystemInfo = (cb) => {
   aggregate({}, [
@@ -197,9 +153,7 @@ let getSystemInfo = (cb) => {
     [getBatteryStats,   setKey('battery')],
     [getVolume,         setKey('volume')],
     [getWorkspaceLabel, setKey('workspace')]
-  ], (stats) => {
-    cb(stats);
-  });
+  ], (stats) => cb(stats));
 }
 
 let progressBar = (val, max, width, text) => {
@@ -214,7 +168,7 @@ let progressBar = (val, max, width, text) => {
 let getMessage = (cb) => {
   const VOLUME_STEP = 3;
 
-  const sep = `${setColor(YELLOW)}%{T2} :: %{T1}${setColor(GREEN)}`;
+  const sep = `${setColor(theme.YELLOW)}%{T2} :: %{T1}${setColor(theme.GREEN)}`;
 
   getSystemInfo((stats) => {
     let charging = (stats.battery.POWER_SUPPLY_STATUS == 'Charging') ? `` : (stats.battery.POWER_SUPPLY_STATUS == 'Discharging') ? `` : ``;
@@ -225,15 +179,14 @@ let getMessage = (cb) => {
       `%{A3:amixer -q sset Master toggle:}`,
       `%{A2:pavucontrol:}`
     ];
-
-    let volumeColor = stats.volume.muted ? WHITE : GREEN;
+    let volumeColor = stats.volume.muted ? theme.WHITE : theme.GREEN;
 
     let volume = `${volumeControls.join('')} ${setColor(volumeColor)}${stats.volume.right}% ${'%{A}'.repeat(volumeControls.length)}`;
-    let battery =  `${setColor(BR_GREEN)}%{R} ${charging} ${setColor(GREEN)}%{R} ${stats.battery.POWER_SUPPLY_CAPACITY}`;
-    let memory = `%{T2}${setColor(BLUE)}${humanReadableMem(stats.memory.mem.used)}%{T1}`;
-    let cpu = `%{T2}${setColor(BLUE)}${Math.round((os.loadavg()[0] / os.cpus().length) * 100)}% CPU%{T1}`;
-    let date = `${greenCode}%{R}  ${stats.date[0]} %{T2}${stats.date[1]}%{T1}  %{R}`;
-    let workspace = `${setColor(GREEN)}%{R} ${stats.workspace} %{R}`;
+    let battery =  `${setColor(theme.BR_GREEN)}%{R} ${charging} ${setColor(theme.GREEN)}%{R} ${stats.battery.POWER_SUPPLY_CAPACITY}`;
+    let memory = `%{T2}${setColor(theme.BLUE)}${stats.memory.readable.mem.used}%{T1}`;
+    let cpu = `%{T2}${setColor(theme.BLUE)}${Math.round((os.loadavg()[0] / os.cpus().length) * 100)}% CPU%{T1}`;
+    let date = `${setColor(theme.GREEN)}%{R}  ${stats.date[0]} %{T2}${stats.date[1]}%{T1}  %{R}`;
+    let workspace = `${setColor(theme.GREEN)}%{R} ${stats.workspace} %{R}`;
 
     let msg = `%{l}${battery}% ${sep}${volume}%{c}${date}%{r}${memory}${sep}${cpu}${sep}${workspace}`;
 
