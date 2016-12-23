@@ -1,0 +1,10 @@
+[package]
+name = "bar"
+version = "0.1.0"
+authors = ["Xavil Pergis <max.duzen@gmail.com>"]
+
+[dependencies]
+mpd = "0.0.11"
+regex = "0.1"
+sys-info = "*"
+time = "0.1"

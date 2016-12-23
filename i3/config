@@ -6,16 +6,16 @@ set $alt Mod1
 set $printscr 107
 
 # Workspace names
-set $ws1  I
-set $ws2  II
-set $ws3  III
-set $ws4  IV
-set $ws5  V
-set $ws6  VI
-set $ws7  VII
-set $ws8  VIII
-set $ws9  IX
-set $ws10 X
+set $ws1  "I"
+set $ws2  "II"
+set $ws3  "III"
+set $ws4  "IV"
+set $ws5  "V"
+set $ws6  "VI"
+set $ws7  "VII"
+set $ws8  "VIII"
+set $ws9  "IX"
+set $ws10 "X"
 
 # Gaps
 set $gaps_inner_padding 10
@@ -52,7 +52,7 @@ set $S_BRIGHT_CYAN    #35cec2
 # Theme
 # ────────────────────
 set $FOCUSED   #859900
-set $UNFOCUSED #002b36
+set $UNFOCUSED #073642
 set $HIGHLIGHT #b0c700
 
 font pango:RobotoMono Nerd Font 10
@@ -82,35 +82,35 @@ bindsym $mod+q kill
 ### Change focus ###
 
 # Vim Keys
-# ───────────────────────────────────
-bindsym $mod+$up          focus up
-bindsym $mod+$down        focus down
-bindsym $mod+$left        focus left
-bindsym $mod+$right       focus right
-bindsym $mod+Shift+$up    move  up
-bindsym $mod+Shift+$down  move  down
-bindsym $mod+Shift+$left  move  left
-bindsym $mod+Shift+$right move  right
+# ─────────────────────────────────────
+bindsym $mod+$up            focus up
+bindsym $mod+$down          focus down
+bindsym $mod+$left          focus left
+bindsym $mod+$right         focus right
+bindsym $mod+Control+$up    move  up
+bindsym $mod+Control+$down  move  down
+bindsym $mod+Control+$left  move  left
+bindsym $mod+Control+$right move  right
 
 # Arrow Keys
-# ──────────────────────────────────
-bindsym $mod+Up          focus up
-bindsym $mod+Down        focus down
-bindsym $mod+Left        focus left
-bindsym $mod+Right       focus right
-bindsym $mod+Shift+Up    move  up
-bindsym $mod+Shift+Down  move  down
-bindsym $mod+Shift+Left  move  left
-bindsym $mod+Shift+Right move  right
+# ────────────────────────────────────
+bindsym $mod+Up            focus up
+bindsym $mod+Down          focus down
+bindsym $mod+Left          focus left
+bindsym $mod+Right         focus right
+bindsym $mod+Control+Up    move  up
+bindsym $mod+Control+Down  move  down
+bindsym $mod+Control+Left  move  left
+bindsym $mod+Control+Right move  right
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 
 # split in horizontal orientation
-bindsym $mod+Control+h split h
+bindsym $mod+Shift+h split h
 
 # split in vertical orientation
-bindsym $mod+Control+v split v
+bindsym $mod+Shift+v split v
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+Control+s layout stacking
@@ -140,17 +140,17 @@ bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
 
 # Move focused container to workspace
-# ────────────────────────────────────────────────────
-bindsym $mod+Shift+1 move container to workspace $ws1
-bindsym $mod+Shift+2 move container to workspace $ws2
-bindsym $mod+Shift+3 move container to workspace $ws3
-bindsym $mod+Shift+4 move container to workspace $ws4
-bindsym $mod+Shift+5 move container to workspace $ws5
-bindsym $mod+Shift+6 move container to workspace $ws6
-bindsym $mod+Shift+7 move container to workspace $ws7
-bindsym $mod+Shift+8 move container to workspace $ws8
-bindsym $mod+Shift+9 move container to workspace $ws9
-bindsym $mod+Shift+0 move container to workspace $ws10
+# ──────────────────────────────────────────────────────
+bindsym $mod+Control+1 move container to workspace $ws1
+bindsym $mod+Control+2 move container to workspace $ws2
+bindsym $mod+Control+3 move container to workspace $ws3
+bindsym $mod+Control+4 move container to workspace $ws4
+bindsym $mod+Control+5 move container to workspace $ws5
+bindsym $mod+Control+6 move container to workspace $ws6
+bindsym $mod+Control+7 move container to workspace $ws7
+bindsym $mod+Control+8 move container to workspace $ws8
+bindsym $mod+Control+9 move container to workspace $ws9
+bindsym $mod+Control+0 move container to workspace $ws10
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -191,6 +191,7 @@ assign [class="Steam"] $ws8
 ### floating windows ###
 for_window [class="Steam"] floating enable
 for_window [class="Gimp"] floating enable
+for_window [class="feh"] floating enable
 # for_window [class="PlayOnLinux"] floating enable
 
 ### KEYBINDS ─────────────────────────────────────────────────────────────── ###
@@ -205,10 +206,11 @@ bindsym XF86AudioLowerVolume  exec --no-startup-id "amixer -q sset Master 10%-"
 bindsym XF86AudioMute         exec --no-startup-id "amixer -q sset Master toggle"
 
 # Take a screenshot
-bindcode $printscr exec --no-startup-id "spectacle"
+bindcode $printscr exec --no-startup-id "fish -c 'screenshot'"
+bindcode Shift+$printscr exec --no-startup-id "fish -c 'screenshot --select'"
 
 # Start a terminal
-bindsym $mod+Return exec --no-startup-id konsole
+bindsym $mod+Return exec --no-startup-id termite
 
 # Launch a program runner
 bindsym $mod+Tab exec --no-startup-id "fish -c launcher"
@@ -218,7 +220,8 @@ bindsym $mod+Tab exec --no-startup-id "fish -c launcher"
 exec --no-startup-id "compton -bG --backend glx --config ~/.config/compton.conf"
 exec --no-startup-id "chromium --no-startup-window"
 
-exec --no-startup-id "feh --bg-scale $DESKTOP_BACKGROUND_PATH"
-exec --no-startup-id "node ~/.config/i3/bar/bar.js"
+exec --no-startup-id "feh --bg-scale /home/xavil/Background/Solarized-Mountains.png"
+exec --no-startup-id "fish -c '~/dotfiles/bar | loopeval'"
+exec --no-startup-id "mpd ~/.mpd/mpd.conf"
 
 exec --no-startup-id "sleep 3 && discord-canary"

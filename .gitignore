@@ -1,4 +1,7 @@
 .*
 !.gitignore
+target
+old_bar
+/bar
 
 fishd.*
